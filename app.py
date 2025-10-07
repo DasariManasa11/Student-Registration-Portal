@@ -1,4 +1,4 @@
-# Update app.py
+# Update app.py with students route
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
@@ -58,10 +58,27 @@ def confirmation():
     email = request.args.get('email', '')
     course = request.args.get('course', '')
     
-    return f"Registration successful for {first_name} {last_name}!"
+    return render_template('confirmation.html', 
+                          first_name=first_name,
+                          last_name=last_name,
+                          email=email,
+                          course=course)
+
+@app.route('/students')
+def students():
+    try:
+        conn = sqlite3.connect('students.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM students ORDER BY registration_date DESC")
+        students = c.fetchall()
+        conn.close()
+        
+        return render_template('students.html', students=students)
+    except Exception as e:
+        flash(f'Error loading students: {str(e)}', 'error')
+        return render_template('students.html', students=[])
 
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
-
 
